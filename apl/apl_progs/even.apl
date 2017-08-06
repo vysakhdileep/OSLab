@@ -2,7 +2,7 @@ integer main()
 {
 
 integer a;
-a=0;
+a=2;
 print("EVEN  ");
 while(a<=20)
 do

@@ -2,16 +2,15 @@ load(7,1);
 load(8,2);
 load(23,17);
 load(24,18);
-[READY_LIST + 0] = 0; // Sets the entry for PID as 0
-[READY_LIST + 32] = 1;
+V
 load(25,21);	// Load 1st page of code from disk to memory
 load(26,22);	// Load 2nd page of code from disk to memory
 load(27,23);
-load(29,26);
+load(29,25);
 load (11, 5);
 load (12, 6);
-load (9, 3);
-load (10, 4);
+[READY_LIST + 0] = 0; // Sets the entry for PID as 0
+[READY_LIST + 32] = 1;
 PTBR = 1024;
 PTLR = 4;
 [PTBR + 0] = 25; 
@@ -36,12 +35,12 @@ PTBR_Process1 = 1024 + 1 * 8;
 [PTBR_Process1 + 5] = "00";
 [PTBR_Process1 + 6] = 30;
 [PTBR_Process1 + 7] = "01";
+
 [READY_LIST + 33] = 1;
 [READY_LIST + 37] = PTBR_Process1;	// PTBR 
 [READY_LIST + 38] = 4;	// PTLR
 [READY_LIST + 34] = 3 * 512; // Sets the entry for BP in the PCB
 [READY_LIST + 35] = 3 * 512;	// Sets the entry for SP in the PCB
 [READY_LIST + 36] = 0;	// Sets the entry for IP to logical address 0 in the PCB
-load(9,3);
-load(10,4);
+
 ireturn;
