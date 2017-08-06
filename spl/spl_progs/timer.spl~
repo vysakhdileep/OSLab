@@ -28,7 +28,6 @@ do
 if(newPCB > (READY_LIST+31*32))
   then 
    newPCB=READY_LIST; 
-   print("PCB");
   else
  newPCB=newPCB+32;
  
