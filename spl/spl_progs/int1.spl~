@@ -1,0 +1,67 @@
+alias physicalSP S0;
+physicalSP = ([PTBR + 2 * (SP / 512)] * 512) + (SP % 512);
+
+
+alias sysCallNo S1;
+sysCallNo=[physicalSP-1];
+
+if ( sysCallNo == 1) then
+
+
+
+alias fileName S3;
+fileName=[physicalSP-3];
+
+alias fat S4;
+fat=FAT;
+
+
+
+while([fat]!=fileName && fat <= (FAT+504)) do
+fat=fat+8;
+endwhile;
+
+if(fat ==(FAT+512)) then
+	[physicalSP -2]="already";
+
+else
+	alias df S5;
+	df=6*512;
+	while([df]!=-1 && df<448) do
+	df=df+8;
+	endwhile;
+	
+	if(df==448) then
+		[physicalSP -2]=-1;
+	
+	else
+		fat=5*512;
+		while([fat]==-1 && fat<=(FAT+504)) do
+		fat=fat+8;
+		endwhile;
+		
+		if(fat ==(FAT+512)) then
+			[physicalSP -2]=-1;
+		
+		else
+			[fat]=fileName;
+			[fat +1]=0;
+			[fat +2]=df;
+			load(1,df);
+			
+			alias temp S6;
+			temp=512;
+			while(temp<1024) do
+			[temp]=-1;
+			temp=temp+1;
+			endwhile;
+			[df]=1;
+		endif;		
+	endif;
+endif;
+endif;
+ireturn;
+
+
+
+

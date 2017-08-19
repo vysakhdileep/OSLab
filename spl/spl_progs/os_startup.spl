@@ -6,6 +6,9 @@ load(24,18);
 load(25,21);	// Load 1st page of code from disk to memory
 load(26,22);	// Load 2nd page of code from disk to memory
 load(27,23);
+load(5,19);
+load(6,20);
+
 PTBR = 1024;
 PTLR = 4;
 [PTBR + 0] = 25; 
@@ -19,9 +22,10 @@ PTLR = 4;
 [READY_LIST + 1] = 2;
 SP = 3 * 512;
 [28 * 512] = 0;
-load (11, 5);
 
+load (11, 5);
 load (12, 6);
 load (9, 3);
 load (10, 4);
+
 ireturn;
