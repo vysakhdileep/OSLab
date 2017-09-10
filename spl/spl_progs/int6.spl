@@ -1,0 +1,163 @@
+alias physicalSP S0;
+physicalSP = ([PTBR + 2*(SP/512)]*512) + (SP%512);
+
+alias sysCallNo S1;
+sysCallNo = [physicalSP - 1];
+
+alias fileName S2;
+fileName = [physicalSP -3 ];
+
+if ( sysCallNo == 9 ) then
+	
+	alias FATIndex S3;
+	FATIndex=0;
+	
+	while(FATIndex < 64) do
+		if ([FAT + 8*FATIndex] == fileName) then
+			break;
+		endif;
+		FATIndex=FATIndex+1;
+	endwhile;
+	
+	if (FATIndex == 64) then
+		[physicalSP - 2]=-1;
+		ireturn;
+	endif;
+
+	alias BasicBlock S4;
+	BasicBlock=[FAT + 8*FATIndex + 2];
+
+	load (1, BasicBlock);
+	
+	alias Blockno S5;
+	Blockno =0;
+	
+	alias counter S6;
+	counter =0;
+
+	while ( counter < 3 ) do
+		if( [ SCRATCHPAD + counter ] != -1 ) then 
+			Blockno = Blockno + 1;
+		endif;
+		
+		counter = counter +1;
+	endwhile;
+	
+	counter =0;
+	if ( Blockno > 4 ) then
+		[physicalSP - 2]=-1;
+		ireturn;
+	endif;
+	
+	alias Pageno S15;
+	Pageno =0;
+	
+	while ( counter < 3 ) do
+		if( [ PTBR + 2*counter +1 ] != "10" || [ PTBR + 2*counter +1 ] != "11" ) then
+			Pageno = Pageno + 1;
+		
+		endif;
+		counter = counter + 1;
+	endwhile;
+	
+	
+	if ( Pageno > Blockno) then 
+		counter = Pageno - Blockno;
+		if ( counter < 2) then
+			counter = 3 - counter;
+		endif;
+		while ( counter > 0 ) do
+			 [MEM_LIST + [PTBR + 2* counter]]=0;
+			 [PTBR + 2 * counter +1] =   "00  ";
+			 [PTBR + 2 * counter ] =-1;
+			 counter = counter - 1;
+		endwhile;
+	endif;
+		if ( Blockno > Pageno) then 
+		counter = 29;
+		
+		alias freepage S6;
+		freepage =0;
+		
+		while( freepage < (Blockno-Pageno)) do
+			
+			if( [MEM_LIST + counter] ==0) then
+				freepage = freepage + 1;
+			endif;
+			counter = counter + 1;
+			
+			if( counter == 64) then
+				[physicalSP - 2]=-1;
+				ireturn;
+			endif;
+			
+		endwhile;
+		
+		counter = 29;
+		freepage = 0;
+		while( freepage < (Blockno-Pageno)) do
+			if( [MEM_LIST + counter] ==0) then
+				freepage = freepage + 1;
+				[MEM_LIST + counter] =1;
+				
+				alias counter2 S7;
+				counter2 =0;
+				
+				while([PTBR + 2* counter2 +1]==  "10" || [PTBR + 2* counter2 +1]==  "11") do
+					counter2 = counter2 +1;
+				endwhile;
+				
+				[PTBR + 2*counter2] = counter;
+				
+				counter = counter +1;
+			endif;
+		endwhile;
+		
+		
+	endif;
+	[PTBR + 7]=  "01";
+	
+	counter = 0;
+	load (1, BasicBlock);
+	while ( counter < Blockno) do
+		if([PTBR + 2*counter]>24) then
+			load([PTBR + 2*counter],[SCRATCHPAD+counter]);
+			[PTBR +2*counter +1]=  "01";
+			counter = counter +1;
+		endif;
+	endwhile;
+	alias currentPCB S14;
+	currentPCB = 1024+ 4* (PTBR-1024);
+	counter =0 ;
+	
+	while ( counter < 8 ) do 
+		
+		alias FileIndex S8;
+		FileIndex=[currentPCB + 2*counter + 15];
+	
+		if( FileIndex != -1 ) then
+			[FILE_TABLE + 2*FileIndex + 1]=[FILE_TABLE + 2*FileIndex + 1]-1;
+
+			if ([FILE_TABLE + 2*FileIndex + 1] == 0) then
+				[FILE_TABLE + 2*FileIndex]=-1;
+			endif;
+				
+			[currentPCB + 2*FileIndex + 15 +2 * counter ] =-1;
+			[currentPCB + 2*FileIndex + 16 +2 * counter ] =-1;			
+		
+		endif;
+		
+		
+		
+		counter = counter + 1;
+	endwhile;
+
+	SP = 3*512;
+	physicalSP=([PTBR + 2*(SP/512)]*512) + (SP%512);
+	[physicalSP ]=0;
+	
+		
+	breakpoint;
+	ireturn;
+endif;
+		

@@ -1,4 +1,4 @@
-sample.dat
+samples.dat
 512
 24
 
@@ -6,7 +6,7 @@ sample.dat
 
 
 
-even.xsm
+samples2.dat
 512
 26
 

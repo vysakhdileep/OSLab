@@ -1,5 +1,3 @@
-load(5,19);
-load(6,20);
 load(7,1);
 load(8,2);
 load(9,3);
@@ -12,15 +10,37 @@ load(15,9);
 load(16,10);
 load(17,11);
 load(18,12);
+load(19,13);
+load(20,14);
+load(21,15);
+load(22,16);
 load(23,17);
 load(24,18);
-
+load(5,19);
+load(6,20);
 alias counter S0;			
 counter = 0;
 while ( counter <  128) do
 	[FILE_TABLE + counter + 0] = -1;
 	[FILE_TABLE + counter + 1] =  0;
 	counter=counter+2;
+endwhile;
+	
+counter =0;
+while (counter < 29) do
+	[MEM_LIST +counter] = 1;
+	counter=counter+1;
+endwhile;
+counter = 29;
+while (counter < 64) do
+	[MEM_LIST +counter] = 0;
+	counter=counter+1;
+endwhile;
+
+counter =0;
+while (counter < 32) do
+	[READY_LIST + 32*counter +1] =0;
+	counter=counter+1;
 endwhile;	
 
 [READY_LIST + 0] = 0; // Sets the entry for PID as 0 
@@ -43,7 +63,7 @@ PTLR = 4;
 
 counter=15;
 while (counter < 31) do
-	[READY_LIST + counter] = -1;
+	[READY_LIST + 32*counter] = -1;
 	counter=counter+1;
 endwhile;
 
