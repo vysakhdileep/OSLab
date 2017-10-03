@@ -1,0 +1,512 @@
+START
+
+MOV SP,
+1535
+MOV BP,
+1535
+JMP 00008
+
+PUSH BP
+
+MOV BP,SP
+
+PUSH R0
+
+PUSH R0
+
+PUSH R0
+
+MOV R0,
+3
+MOV R1,
+BP
+ADD R0,
+R1
+PUSH R0
+
+MOV R1,
+11
+PUSH R1
+
+INT 6
+
+POP R2
+
+POP R1
+
+MOV [R0],
+R1
+MOV R0,
+"pid"
+OUT R0
+
+MOV R0,
+3
+MOV R1,
+BP
+ADD R0,
+R1
+MOV R0,
+[R0]
+OUT R0
+
+MOV R0,
+3
+MOV R1,
+BP
+ADD R0,
+R1
+PUSH R0
+
+MOV R1,
+12
+PUSH R1
+
+INT 6
+
+POP R2
+
+POP R1
+
+MOV [R0],
+R1
+MOV R0,
+"ppid"
+OUT R0
+
+MOV R0,
+3
+MOV R1,
+BP
+ADD R0,
+R1
+MOV R0,
+[R0]
+OUT R0
+
+MOV R0,
+1
+MOV R1,
+BP
+ADD R0,
+R1
+PUSH R0
+
+MOV R1,
+8
+PUSH R1
+
+INT 5
+
+POP R2
+
+POP R1
+
+MOV [R0],
+R1
+MOV R0,
+1
+MOV R1,
+BP
+ADD R0,
+R1
+MOV R0,
+[R0]
+MOV R1,
+0
+MOV R2,
+2
+SUB R1,
+R2
+EQ R0,
+R1
+JZ R0,
+00152
+MOV R0,
+2
+MOV R1,
+BP
+ADD R0,
+R1
+MOV R1,
+"stage10.xsm"
+PUSH R1
+
+PUSH R0
+
+MOV R1,
+9
+PUSH R1
+
+INT 6
+
+POP R2
+
+POP R1
+
+POP R2
+
+MOV [R0],
+R1
+JMP 00152
+
+MOV R0,
+1
+MOV R1,
+BP
+ADD R0,
+R1
+MOV R0,
+[R0]
+MOV R1,
+0
+GE R0,
+R1
+MOV R1,
+1
+MOV R2,
+BP
+ADD R1,
+R2
+MOV R1,
+[R1]
+MOV R2,
+32
+LT R1,
+R2
+MUL R0,
+R1
+JZ R0,
+00214
+MOV R0,
+3
+MOV R1,
+BP
+ADD R0,
+R1
+MOV R1,
+1
+MOV R2,
+BP
+ADD R1,
+R2
+MOV R1,
+[R1]
+PUSH R1
+
+PUSH R0
+
+MOV R1,
+13
+PUSH R1
+
+INT 7
+
+POP R2
+
+POP R1
+
+POP R2
+
+MOV [R0],
+R1
+JMP 00214
+
+MOV R0,
+10
+PUSH R0
+
+INT 7
+
+INT 7
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
