@@ -6,11 +6,9 @@ integer main()
 		retval = Exec("sample.xsm");
 	else
 		while(childpid != -1) do
-			if(childpid>0 && childpid<32) then			
+				
 				print(childpid);
-			else
-				breakpoint;
-			endif;	
+			
 		endwhile;
 	endif;
 return 0;

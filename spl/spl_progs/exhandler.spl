@@ -1,4 +1,5 @@
-
+define READY_LIST 31232;
+define PAGE_TABLE 1536;
 alias Cause S0;
 Cause = EFR%10;	
 
@@ -43,7 +44,7 @@ endif;
 alias counter S6;
 counter =0;
 
-while (counter < 64) do
+while (counter < 61) do
 	if ([MEM_LIST + counter] == 0) then
 		[MEM_LIST + counter]=1;
 		break;
@@ -56,10 +57,10 @@ pageIndex=PTBR - PAGE_TABLE + 2*BadVAddr + 2;
 
 alias blockno S8;
 
-if (counter == 64) then
+if (counter == 61) then
 	while(1) do
-		if (pageIndex >= 256) then
-			pageIndex=pageIndex-256;
+		if (pageIndex >= 48*8) then
+			pageIndex=pageIndex-48*8;
 		endif;
 
 		if (pageIndex == (PTBR -PAGE_TABLE +6) ) then

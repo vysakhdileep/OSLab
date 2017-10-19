@@ -1,3 +1,5 @@
+define READY_LIST 31232;
+define PAGE_TABLE 1536;
 alias physicalSP S0;
 physicalSP = ([PTBR + 2*(SP/512)]*512) + (SP%512);
 
@@ -49,7 +51,7 @@ if (sysCallNo == 2) then
 	endif;
 
 	alias currentPID S5;
-	currentPID = (PTBR - 1024)/8;
+	currentPID = (PTBR - PAGE_TABLE)/8;
 
 	alias currentPCB S6;
 	currentPCB = READY_LIST + 32*currentPID;
@@ -86,7 +88,7 @@ if (sysCallNo == 3) then
 	endif;
 
 	alias currentPID S3;
-	currentPID = (PTBR - 1024)/8;
+	currentPID = (PTBR - PAGE_TABLE)/8;
 	
 	alias currentPCB S4;
 	currentPCB = READY_LIST + 32*currentPID;

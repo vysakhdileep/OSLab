@@ -1,3 +1,5 @@
+define READY_LIST 31232;
+define PAGE_TABLE 1536;
 load(7,1);
 load(8,2);
 load(9,3);
@@ -34,13 +36,19 @@ while (counter < 26) do
 endwhile;
 
 counter = 26;
-while (counter < 64) do
+while (counter < 61) do
 	[MEM_LIST +counter] = 0;
 	counter=counter+1;
 endwhile;
 
+counter = 61;
+while (counter < 64) do
+	[MEM_LIST +counter] = 1;
+	counter=counter+1;
+endwhile;
+
 counter =0;
-while (counter < 32) do
+while (counter < 48) do
 	[READY_LIST + 32*counter +1] =0;
 	counter=counter+1;
 endwhile;	
@@ -48,7 +56,7 @@ endwhile;
 [READY_LIST + 0] = 0; // Sets the entry for PID as 0 
 
 
-PTBR = 1024;
+PTBR = PAGE_TABLE;
 PTLR = 4;
 
 [PTBR + 0] = 21; // Physical Page Number for Logical Page 0
@@ -76,6 +84,6 @@ endwhile;
 store(6,20);
 [READY_LIST + 1] = 2; // Sets the entry for STATE as Running 
 SP = 3*512;
-[28*512] = 0; // Set up the IP value for INIT in the stack
+[25*512] = 0; // Set up the IP value for INIT in the stack
 
 ireturn;

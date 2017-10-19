@@ -1,6 +1,7 @@
-
+define READY_LIST 31232;
+define PAGE_TABLE 1536;
 alias currentPID S0;
-currentPID = (PTBR - 1024)/8;
+currentPID = (PTBR - PAGE_TABLE)/8;
 
 alias currentPCB S1;
 currentPCB = READY_LIST + 32*currentPID;
@@ -29,7 +30,7 @@ alias newPID S3;
 newPID = currentPID + 1;
 alias newPCB S4;
 while(1) do
-	if (newPID == 32) then
+	if (newPID == 48) then
 		newPID=0;
 	endif;
 	newPCB = READY_LIST + 32*newPID;
@@ -45,7 +46,7 @@ counter = 25;
 
 if( [ [newPCB+5] + 6] > 447) then
 	
-	while( counter < 64 ) do
+	while( counter < 61 ) do
 		if( [MEM_LIST + counter] ==0) then
 			load(counter,[[newPCB + 5]+ 6]);
 			[DISK_LIST + [ [newPCB + 5]+ 6]]=0;
@@ -58,7 +59,7 @@ if( [ [newPCB+5] + 6] > 447) then
 		counter = counter + 1;
 	endwhile;
 
-	if ( counter == 64 ) then
+	if ( counter == 61 ) then
 		 load(1,[[newPCB + 5] +6]);
 		 store([PTBR + 6],[[newPCB + 5]+6]);
 		 alias counter2 S6;

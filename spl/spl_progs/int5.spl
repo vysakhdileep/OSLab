@@ -1,4 +1,5 @@
-
+define READY_LIST 31232;
+define PAGE_TABLE 1536;
 alias physicalSP S0;
 physicalSP = ([PTBR + 2*(SP/512)]*512) + (SP%512);
 
@@ -7,21 +8,21 @@ sysCallNo = [physicalSP - 1];
 
 if (sysCallNo == 8) then
 	alias currentPID S2;
-	currentPID = (PTBR - 1024)/8;
+	currentPID = (PTBR - PAGE_TABLE)/8;
 	
 	alias currentPCB S3;
 	currentPCB = READY_LIST + 32*currentPID;
 
 	alias newPID S4;
 	newPID=0;
-	while (newPID < 32) do
+	while (newPID < 48) do
 		if ([READY_LIST + 32*newPID + 1] == 0) then
 			break;
 		endif;
 		newPID=newPID+1;
 	endwhile;
 
-	if (newPID == 32) then
+	if (newPID == 48) then
 		[physicalSP - 2]=-1;
 		ireturn;
 	endif;
@@ -31,7 +32,7 @@ if (sysCallNo == 8) then
 
 	alias free_page S5;
 	free_page=0;
-	while (free_page < 64) do
+	while (free_page < 61) do
 		if ([MEM_LIST + free_page] == 0) then
 			[MEM_LIST + free_page]=1;
 			break;
@@ -40,10 +41,10 @@ if (sysCallNo == 8) then
 	endwhile;
 	alias pageIndex S12;
 	pageIndex=0;
-	if (free_page == 64) then
+	if (free_page == 61) then
 		while(1) do
-			if (pageIndex >= 256) then
-				pageIndex=pageIndex-256;
+			if (pageIndex >= 48*8) then
+				pageIndex=pageIndex-48*8;
 			endif;
 
 			if (pageIndex  == PTBR-PAGE_TABLE + 6) then
@@ -157,5 +158,5 @@ if (sysCallNo == 8) then
 	newPhysicalSP=([newPTBR + 2*((SP-1)/512)]*512) + ((SP-1)%512);
 	[newPhysicalSP - 1]=-2;
 endif;
-
+breakpoint;
 ireturn;
