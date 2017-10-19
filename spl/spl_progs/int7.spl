@@ -1,4 +1,5 @@
-`alias physicalSP S0;
+
+alias physicalSP S0;
 physicalSP = ([PTBR + 2*(SP/512)]*512) + (SP%512);
 
 alias sysCallNo S1;
@@ -10,13 +11,15 @@ currentPID=(PTBR - 1024)/8;
 alias currentPCB S3;
 currentPCB=READY_LIST + 32*currentPID;
 
+alias newPID S4;
+newPID = 0;
+alias newPCB S5;
 
+alias counter S6;
+alias FileIndex S7;
 if (sysCallNo == 10) then
 	
 
-	alias newPID S4;
-	newPID = 0;
-	alias newPCB S5;
 	while(newPID < 32) do
 		newPCB = READY_LIST + 32*newPID;
 		if ([newPCB + 1] == (100 + currentPID)) then
@@ -40,13 +43,12 @@ if (sysCallNo == 10) then
 		halt;
 	endif;
 
-	breakpoint;
+
 
 	currentPID=(PTBR - 1024)/8;
 	currentPCB=READY_LIST + 32*currentPID;
 
-	alias counter S6;
-	alias FileIndex S7;
+
 	counter=0;
 	while(counter < 8) do
 		FileIndex=[currentPCB + 2*counter + 15];
@@ -66,7 +68,7 @@ if (sysCallNo == 10) then
 		counter=counter+1;
 	endwhile;
 
-	breakpoint;
+
 
 	[currentPCB + 1]=0;
 
@@ -97,10 +99,7 @@ if (sysCallNo == 13) then
 	Wpcb = READY_LIST + 32*Wpid;
 
 
-	if ((Wpid < 0) || (Wpid >= 32)) then
-		[physicalSP - 2]=-1;
-		ireturn;
-	endif;
+	
 
 	if ((Wpid == currentPID) || ([Wpcb + 1] == 0)) then
 		[physicalSP - 2]=-1;
@@ -125,27 +124,12 @@ if (sysCallNo == 13) then
 	[physicalSP - 2]=0;
 endif;
 
-if (sysCallNo == 14) then
-	
-	alias newPID S3;
-	newPID = 0;
-	alias newPCB S4;
-	while(newPID < 32) do
-		newPCB = READY_LIST + 32*newPID;
-		if ([newPCB + 1] == (100 + currentPID)) then
-			[newPCB + 1]=1;
-		endif;
-		newPID = newPID + 1;
-	endwhile;
-
-	[physicalSP - 2]=0;
-endif;
 
 if ((sysCallNo == 10) || (sysCallNo == 13)) then
 
-	alias newPID S6;
+	
 	newPID = currentPID + 1;
-	alias newPCB S7;
+	
 	while(1) do
 		if (newPID == 32) then
 			newPID=0;
@@ -156,6 +140,41 @@ if ((sysCallNo == 10) || (sysCallNo == 13)) then
 		endif;
 		newPID = newPID+1;
 	endwhile;
+
+
+counter = 25;
+
+if( [ [newPCB+5] + 6] > 447) then
+
+	while( counter < 64 ) do
+		if( [MEM_LIST + counter] ==0) then
+			load(counter,[[newPCB + 5]+ 6]);
+			[DISK_LIST + [ [newPCB + 5]+ 6]]=0;
+			store(6,20);
+			[MEM_LIST + counter]=1;
+			[[newPCB + 5] + 6]=counter;
+			[[newPCB + 5] + 7]="11";
+			break;
+		endif;
+		counter = counter + 1;
+	endwhile;
+
+	if ( counter == 64 ) then
+		 load(1,[[newPCB + 5] +6]);
+		 store([PTBR + 6],[[newPCB + 5]+6]);
+		 alias counter2 S14;
+		 counter2=0;
+		 while(counter2 <512)do
+		 	[[PTBR +6]*512+counter2]=[SCRATCHPAD + counter2];
+		 	counter2= counter2 +1;
+		 endwhile;
+		 counter2=[[newPCB+5]+6];
+		 [[newPCB+5]+6]=[PTBR+6];
+		 [[newPCB+5]+7]="11";
+		 [PTBR + 6]=counter2;
+		 [PTBR + 7]="00";
+	 endif;
+endif;
 
 	BP = [newPCB + 2];
 	SP = [newPCB + 3];

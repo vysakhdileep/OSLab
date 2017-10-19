@@ -1,3 +1,4 @@
+
 alias physicalSP S0;
 physicalSP = ([PTBR + 2*(SP/512)]*512) + (SP%512);
 
@@ -45,8 +46,9 @@ if (sysCallNo == 8) then
 				pageIndex=pageIndex-256;
 			endif;
 
-			if ((pageIndex % 8) == 6) then
+			if (pageIndex  == PTBR-PAGE_TABLE + 6) then
 				pageIndex=pageIndex+2;
+	
 				continue;
 			endif;
 
@@ -93,7 +95,7 @@ if (sysCallNo == 8) then
 	newPTBR=PAGE_TABLE + 8*newPID;
 
 	alias counter S8;
-	counter=0;
+		counter=0;
 	pageIndex=PTLR-1;
 	while (counter < 512) do
 		[512*free_page + counter]=[512*[PTBR + 2*pageIndex] + counter];

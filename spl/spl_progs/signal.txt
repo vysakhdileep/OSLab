@@ -1,0 +1,12 @@
+
+if (sysCallNo == 14) then
+	while(newPID < 32) do
+		newPCB = READY_LIST + 32*newPID;
+		if ([newPCB + 1] == (100 + currentPID)) then
+			[newPCB + 1]=1;
+		endif;
+		newPID = newPID + 1;
+	endwhile;
+
+	[physicalSP - 2]=0;
+endif;
