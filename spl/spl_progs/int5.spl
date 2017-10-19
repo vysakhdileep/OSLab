@@ -37,17 +37,62 @@ if (sysCallNo == 8) then
 		endif;
 		free_page=free_page+1;
 	endwhile;
-
+	alias pageIndex S12;
+	pageIndex=0;
 	if (free_page == 64) then
-		[physicalSP - 2]=-1;
-		ireturn;
+		while(1) do
+			if (pageIndex >= 256) then
+				pageIndex=pageIndex-256;
+			endif;
+
+			if ((pageIndex % 8) == 6) then
+				pageIndex=pageIndex+2;
+				continue;
+			endif;
+
+			if ([PAGE_TABLE + pageIndex + 1] == "01") then
+				if ([MEM_LIST + [PAGE_TABLE + pageIndex]] > 1) then
+					pageIndex=pageIndex+2;
+					continue;
+				endif;
+				alias blockno S13;
+				blockno=448;
+				while(blockno < 512) do
+					if ([DISK_LIST + blockno] == 0) then
+						break;
+					endif;
+					blockno=blockno+1;
+				endwhile;
+
+				if (blockno == 512) then
+					SP=SP+2;
+					[physicalSP + 1]=10;
+					inline "JMP 11776";
+				endif;
+
+				store([PAGE_TABLE + pageIndex],blockno);
+				[DISK_LIST + blockno]=1;
+				store(6,20);
+
+				free_page=[PAGE_TABLE + pageIndex];
+				[PAGE_TABLE + pageIndex]=blockno;
+				[PAGE_TABLE + pageIndex + 1]="00";
+				break;
+			endif;
+
+			if ([PAGE_TABLE + pageIndex + 1] == "11") then
+				[PAGE_TABLE + pageIndex + 1]="01";
+			endif;
+
+			pageIndex=pageIndex+2;
+		endwhile;
 	endif;
+
 
 	alias newPTBR S7;
 	newPTBR=PAGE_TABLE + 8*newPID;
 
 	alias counter S8;
-	alias pageIndex S9;
 	counter=0;
 	pageIndex=PTLR-1;
 	while (counter < 512) do
@@ -106,7 +151,7 @@ if (sysCallNo == 8) then
 	[READY_LIST+32*newPID + 31]=currentPID;
 	[physicalSP - 2]=newPID;
 
-	alias newPhysicalSP S12;
+	alias newPhysicalSP S14;
 	newPhysicalSP=([newPTBR + 2*((SP-1)/512)]*512) + ((SP-1)%512);
 	[newPhysicalSP - 1]=-2;
 endif;
