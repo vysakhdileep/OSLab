@@ -1,126 +1,128 @@
-define READY_LIST 31232;
 define PAGE_TABLE 1536;
-alias Cause S0;
-Cause = EFR%10;	
+define READY_LIST 31232;
 
-alias BadVAddr S1;
-BadVAddr = (EFR/10)%100;
+alias cause S0;
+alias vpage S1;
+alias ip_addr S2;
+alias pg_num S3;
+alias physicalnum S4;
+alias physicalSP S5;
 
-alias Ip_addr S2;
-Ip_addr = (EFR/1000);
+alias i S15;
+alias j S14;
+alias flag S13;
 
-alias VPagenum S3;		
-VPagenum = [PTBR + 2*BadVAddr];
+cause = EFR % 10;		// Gets value of cause field (size 1 char)
+vpage = (EFR / 10) % 100;    // Gets value of BadVAddr 
+ip_addr = (EFR/1000);
+physicalnum = [PTBR + 2*vpage];
 
-alias physicalSP S4;
-physicalSP=([PTBR + 2*(SP/512)]*512) + (SP%512);
+if (cause != 0) then   // Jump to exit handler
+	physicalSP = ([PTBR + 2 * (SP / 512)] * 512) + (SP % 512);
+	[physicalSP + 1] = 10;    //system call number for exit
+	SP = SP + 2;
+	inline "JMP 11776";
+endif;
 
-if (Cause != 0) then
-	if (Cause == 1) then
-		print("Illegal instruction");
-	endif;
-	if (Cause == 2) then
-		print("Illegal memory access");
-	endif;
-	if (Cause == 3) then
-		print("Arithmetic exception");
-	endif;
-	if (Cause == 4) then
-		print("Illegal operands");
-	endif;
-	SP=SP+2;
-	[physicalSP + 1]=10;
+if (physicalnum == -1) then
+	print "ERROR : SF";
+	physicalSP = ([PTBR + 2 * (SP / 512)] * 512) + (SP % 512);
+	[physicalSP + 1] = 10;    //system call number for exit
+	SP = SP + 2;
 	inline "JMP 11776";
 endif;
 
 
-if (VPagenum == -1) then
-	SP=SP+2;
-	[physicalSP + 1]=10;
-	inline "JMP 11776";
-endif;
+pg_num = -1;
+i = 25;
 
-
-alias counter S6;
-counter =0;
-
-while (counter < 61) do
-	if ([MEM_LIST + counter] == 0) then
-		[MEM_LIST + counter]=1;
+while (i < 64) do
+	if([MEM_LIST + i] == 0) then
+		pg_num = i;
 		break;
 	endif;
-	counter=counter+1;
+	i = i + 1;
 endwhile;
 
-alias pageIndex S7;
-pageIndex=PTBR - PAGE_TABLE + 2*BadVAddr + 2;
+if (pg_num == -1) then                                      //No free page in memory
 
-alias blockno S8;
+	
+	i = PTBR + 2*vpage + 2;                                // set i to address of next page
 
-if (counter == 61) then
-	while(1) do
-		if (pageIndex >= 48*8) then
-			pageIndex=pageIndex-48*8;
-		endif;
+	while (1) do
 
-		if (pageIndex == (PTBR -PAGE_TABLE +6) ) then
-			pageIndex=pageIndex+2;
-			
-			continue;
-		endif;
-
-		if ([PAGE_TABLE + pageIndex + 1] == "01") then
-			if ([MEM_LIST + [PAGE_TABLE + pageIndex]] > 1) then
-				pageIndex=pageIndex+2;
-				continue;
-			endif;
-
-			blockno=448;
-			while(blockno < 512) do
-				if ([DISK_LIST + blockno] == 0) then
+		if ([i+1] == "01" || [i+1] == "11") then               // if in memory page
+	
+			if([i+1] == "11") then
+				[i+1] = "01";
+			else
+				if( [MEM_LIST + [i]] < 2 && (i != PTBR + 6) ) then    //if not a shared page and not a stack, swap
+					
+					j = 448;
+					flag = 0;
+					while(j < 512) do
+						if ([DISK_LIST + j] == 0) then
+							flag = j;
+							break;
+						endif;
+						j = j+1;
+					endwhile;
+	
+					if(flag == 0) then
+						print "Out memory 2";
+						physicalSP = ([PTBR + 2 * (SP / 512)] * 512) + (SP % 512);
+						[physicalSP + 1] = 10;    //system call number for exit
+						SP = SP + 2;
+						inline "JMP 11776";
+					endif;
+	
+					store ([i],j);                             //moving page out
+					[DISK_LIST + j] = [DISK_LIST + j] + 1;     //incrementing DISK_LIST 
+					
+					pg_num = [i];                               //stoing pg in a register
+					[i] = j;                                   //updating page tables of victim page
+					[i + 1] = "00";
+	
 					break;
 				endif;
-				blockno=blockno+1;
-			endwhile;
-
-			if (blockno == 512) then
-				SP=SP+2;
-				[physicalSP + 1]=10;
-				inline "JMP 11776";
 			endif;
-
-			store([PAGE_TABLE + pageIndex],blockno);
-			[DISK_LIST + blockno]=1;
-			store(6,20);
-
-			counter=[PAGE_TABLE + pageIndex];
-			[PAGE_TABLE + pageIndex]=blockno;
-			[PAGE_TABLE + pageIndex + 1]="00";
-			break;
+		endif;
+	
+		i = i + 2;
+		if(i >= (PAGE_TABLE + 384) ) then
+			i = PAGE_TABLE;
 		endif;
 
-		if ([PAGE_TABLE + pageIndex + 1] == "11") then
-			[PAGE_TABLE + pageIndex + 1]="01";
-		endif;
-
-		pageIndex=pageIndex+2;
 	endwhile;
+	
 endif;
 
-if ((VPagenum > 20) && (VPagenum < 448)) then
-	load(counter, VPagenum);
+store (6,20);                     //committing back DF list
+[MEM_LIST + pg_num] = 1;        //setting new page as used
+
+if (physicalnum < 448) then
+
+	load (pg_num,physicalnum);
+else
+	load (pg_num,physicalnum);
+	[DISK_LIST + physicalnum] = [DISK_LIST + physicalnum] - 1;
 endif;
 
-if (VPagenum >= 448) then
-	load(counter, VPagenum);
-	[DISK_LIST + VPagenum]=[DISK_LIST + VPagenum]-1;
-	store(6,20);
-endif;
+store (6,20);                        //committing back DF list
 
-[PTBR + 2*BadVAddr]=counter;
-[PTBR + 2*BadVAddr + 1]="11";
+[PTBR + 2*vpage] = pg_num;
+[PTBR + 2*vpage + 1] = "11";
 
-SP=SP+1;
-[physicalSP + 1]=Ip_addr;
+SP = SP + 1;
+
+physicalSP = ([PTBR + 2 * (SP / 512)] * 512) + (SP % 512);
+
+[physicalSP] = ip_addr;
+
+//print "exexit";
+//breakpoint;
+
 
 ireturn;
+
+
